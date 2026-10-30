@@ -133,6 +133,8 @@
   .cat-tile { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
   .cat-media { aspect-ratio: 4 / 3; background: var(--panel-2); position: relative; }
   .cat-media img { width: 100%; height: 100%; object-fit: cover; }
+  .cat-media.contain { background: #fff; }
+  .cat-media.contain img { object-fit: contain; padding: 16px; }
   .placeholder {
     position: absolute; inset: 0;
     display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
@@ -383,8 +385,8 @@ const CONFIG = {
   // Contact info (placeholders — replace before launch)
   company:      'Central Office Service & Supply',
   companyShort: 'COSS <span>/</span> Office Furniture',
-  phone:   { display: '(555) 555-0123', tel: '+15555550123' },
-  email:   'furniture@example.com',
+  phone:   { display: '785-632-2177', tel: '+17856322177' },
+  email:   'sales@centralofficesupply.com',
   address: '123 Main St, Anytown, KS 00000',
   hours:   'Mon–Fri, 8:00 am – 5:00 pm',
   mainSiteUrl:   'https://www.centralofficesupply.com',
@@ -425,6 +427,7 @@ const CONFIG = {
   categories: {
     heading: 'What we can furnish',
     // image: path relative to index.html. If the file is missing, a labeled placeholder shows instead.
+    // fit: 'contain' shows the whole image on white (for product cut-outs); default crops to fill the tile.
     list: [
       { name: 'Desks and workstations',  desc: 'Private offices, open layouts, and everything in between.', image: 'images/desks.jpg' },
       { name: 'Seating',                 desc: 'Task chairs, guest seating, and conference chairs.', image: 'images/seating.jpg' },
@@ -518,7 +521,7 @@ const CONFIG = {
   const catGrid = document.getElementById('cat-grid');
   catGrid.innerHTML = CONFIG.categories.list.map((c, i) => `
     <article class="cat-tile">
-      <div class="cat-media" data-i="${i}">
+      <div class="cat-media${c.fit === 'contain' ? ' contain' : ''}" data-i="${i}">
         ${c.image ? `<img src="${esc(c.image)}" alt="${esc(c.name)}" loading="lazy" width="800" height="600">` : placeholder(c)}
       </div>
       <div class="cat-body">
