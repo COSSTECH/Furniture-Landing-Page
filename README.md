@@ -49,22 +49,13 @@ The quote form sends through EmailJS with no backend. Until real keys are entere
 
 1. Sign in at [emailjs.com](https://www.emailjs.com). You can use the account the copier wizard uses.
 2. **Email Services:** use the existing service or add one. Copy its **Service ID**.
-3. **Email Templates:** create a new template. Set **To Email** to the address that should receive leads, set **Reply To** to `{{reply_to}}`, and use a subject like `Furniture quote request: {{name}} ({{furnishing}})`. Example body:
+3. **Email Templates:** create a new template. Set **To Email** to the address that should receive leads, set **Reply To** to `{{reply_to}}`, and use a subject like `Furniture quote request: {{name}} ({{furnishing}})`. In code view, set the **Content** to exactly:
 
    ```
-   New furniture quote request
-
-   Name:          {{name}}
-   Company:       {{company}}
-   Phone/email:   {{contact}}
-   Furnishing:    {{furnishing}}
-   Layout help:   {{layout_help}}
-   Notes:         {{notes}}
-
-   Flyer source:  {{src}}
-   Page:          {{page_url}}
-   Submitted:     {{submitted_at}}
+   {{{message_html}}}
    ```
+
+   The page builds the full email HTML itself in `buildEmailHtml()` in `index.html`, the same way the copier wizard does, so the EmailJS editor can't rewrite the layout. Use triple braces so EmailJS inserts the HTML as-is. Visitor input is escaped before it goes into the HTML. To change how the email looks, edit `buildEmailHtml()`.
 
    Copy the **Template ID**.
 4. **Account → General:** copy the **Public Key**.
@@ -80,6 +71,7 @@ The quote form sends through EmailJS with no backend. Until real keys are entere
 | `layout_help` | `Yes` / `No`, or `N/A` when `OFFER_LAYOUT_CONSULT` is false |
 | `src` | Value of the `?src=` URL parameter, or `(none)` |
 | `page_url`, `submitted_at` | Full page URL and Central time timestamp |
+| `message_html` | The finished email HTML (use as `{{{message_html}}}`) |
 
 ## Flyer tracking
 
