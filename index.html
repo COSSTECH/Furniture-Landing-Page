@@ -105,6 +105,29 @@
   .hero h1 .accent { color: var(--blue-text); }
   .hero-sub { font-size: 1.15rem; color: var(--text-muted); max-width: 600px; margin-bottom: 30px; }
   .hero-actions { display: flex; flex-wrap: wrap; gap: 14px; }
+  .call-wrap { position: relative; display: flex; }
+  .call-pop {
+    position: absolute; top: calc(100% + 10px); left: 0; z-index: 20;
+    width: max-content; min-width: 260px;
+    padding: 20px 48px 20px 22px;
+    background: var(--panel); border: 1px solid var(--line); border-top: 4px solid var(--blue);
+    border-radius: var(--radius); box-shadow: 0 12px 32px rgba(0,0,0,.14);
+  }
+  .call-pop[hidden] { display: none; }
+  .call-pop-label { font-size: .85rem; text-transform: uppercase; letter-spacing: .06em; color: var(--text-muted); }
+  .call-pop-number {
+    display: block; margin: 2px 0 6px;
+    font-family: var(--font-head); font-size: 2.2rem; font-weight: 700; line-height: 1.1;
+    color: var(--text); text-decoration: none;
+  }
+  .call-pop-number:hover { color: var(--blue-text); }
+  .call-pop-hours { color: var(--text-muted); font-size: .95rem; }
+  .call-pop-close {
+    position: absolute; top: 6px; right: 6px; width: 36px; height: 36px;
+    border: 0; background: transparent; color: var(--text-muted);
+    font-size: 1.6rem; line-height: 1; cursor: pointer; border-radius: 6px;
+  }
+  .call-pop-close:hover { color: var(--text); background: var(--bg-alt); }
   .hero-support {
     margin: 22px 0 0; font-weight: 500; color: var(--text);
     display: flex; align-items: center; gap: 10px;
@@ -227,7 +250,7 @@
   @media (max-width: 719px) {
     body:not(.embedded) .sticky-bar { display: flex; }
     body:not(.embedded) { padding-bottom: calc(76px + env(safe-area-inset-bottom)); }
-    .hero-actions .btn { flex: 1 1 100%; }
+    .hero-actions .btn, .hero-actions .call-wrap { flex: 1 1 100%; }
   }
   @media (min-width: 560px) {
     .cat-grid { grid-template-columns: repeat(2, 1fr); }
@@ -260,10 +283,19 @@
     <p class="hero-sub" data-copy="hero.subhead"></p>
     <div class="hero-actions">
       <a class="btn btn-primary js-quote" href="#quote" data-copy="hero.primaryButton"></a>
-      <a class="btn btn-secondary js-call" href="#" target="_top">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg>
-        <span data-copy="hero.secondaryButton"></span>
-      </a>
+      <div class="call-wrap">
+        <a class="btn btn-secondary js-call" id="hero-call" href="#" target="_top">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg>
+          <span data-copy="hero.secondaryButton"></span>
+        </a>
+        <!-- Desktop only: the hero Call button opens this instead of dialing -->
+        <div class="call-pop" id="call-pop" role="dialog" aria-labelledby="call-pop-label" hidden>
+          <button type="button" class="call-pop-close" aria-label="Close">&times;</button>
+          <div class="call-pop-label" id="call-pop-label" data-copy="hero.callPopupLabel"></div>
+          <a class="call-pop-number js-call" href="#" target="_top"></a>
+          <div class="call-pop-hours"></div>
+        </div>
+      </div>
     </div>
     <p class="hero-support js-layout-only" data-copy="hero.supportingLine"></p>
   </div>
@@ -398,6 +430,7 @@ const CONFIG = {
     subhead: 'Quality desks, seating, storage, and more from HON and Lorell, from the same local team you trust for copiers, printers, and technology.',
     primaryButton: 'Request a quote',
     secondaryButton: 'Call us',
+    callPopupLabel: 'Give us a call', // desktop: the Call us button shows the number in a popup
     supportingLine: 'Free quote and layout help.', // only if OFFER_LAYOUT_CONSULT
   },
 
@@ -563,6 +596,34 @@ const CONFIG = {
 
   // Call buttons
   document.querySelectorAll('.js-call').forEach((a) => { a.href = telHref; });
+
+  // Hero Call button: phones dial; on a computer (mouse, no touch) show the number instead
+  const heroCall = document.getElementById('hero-call');
+  const callPop = document.getElementById('call-pop');
+  callPop.querySelector('.call-pop-number').textContent = CONFIG.phone.display;
+  callPop.querySelector('.call-pop-hours').textContent = CONFIG.hours;
+  const isDesktop = window.matchMedia('(hover: hover) and (pointer: fine)');
+  const setPop = (open) => {
+    callPop.hidden = !open;
+    heroCall.setAttribute('aria-expanded', String(open));
+  };
+  if (isDesktop.matches) {
+    heroCall.setAttribute('aria-controls', 'call-pop');
+    heroCall.setAttribute('aria-expanded', 'false');
+  }
+  heroCall.addEventListener('click', (e) => {
+    if (!isDesktop.matches) return; // let tel: dial
+    e.preventDefault();
+    setPop(callPop.hidden);
+    if (!callPop.hidden) callPop.querySelector('.call-pop-number').focus();
+  });
+  callPop.querySelector('.call-pop-close').addEventListener('click', () => { setPop(false); heroCall.focus(); });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !callPop.hidden) { setPop(false); heroCall.focus(); }
+  });
+  document.addEventListener('click', (e) => {
+    if (!callPop.hidden && !callPop.contains(e.target) && !heroCall.contains(e.target)) setPop(false);
+  });
 
   // Quote buttons: smooth-scroll to form and focus the first field
   const form = document.getElementById('quote-form');
